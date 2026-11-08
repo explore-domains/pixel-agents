@@ -8,8 +8,8 @@
 ## v1 Requirements
 
 ### Core Infrastructure
-- [ ] **CORE-01**: Implement canonical `AgentEvent` normalization boundary in `HookEventHandler`.
-- [ ] **CORE-02**: Implement multi-provider session registry with namespacing (provider + workspace + sessionID).
+- [x] **CORE-01**: Implement canonical `AgentEvent` normalization boundary in `HookEventHandler`.
+- [x] **CORE-02**: Implement multi-provider session registry with namespacing (provider + workspace + sessionID).
 
 ### Agent Adapters
 - [ ] **ADAP-01**: Implement Antigravity hook adapter (shell-bridge).

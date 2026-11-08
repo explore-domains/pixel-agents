@@ -95,14 +95,14 @@ describe('PixelAgentsServer', () => {
   });
 
   // 4. Hook endpoint accepts valid auth
-  it('hook endpoint returns 200 with valid auth', async () => {
+  it('hook endpoint returns 202 with valid auth', async () => {
     const config = await server.start();
     const res = await postHook(
       config.port,
       config.token,
       JSON.stringify({ session_id: 'test', hook_event_name: 'Stop' }),
     );
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(202);
   });
 
   // 5. Hook callback fires on valid event

@@ -3,6 +3,9 @@
 ## Phase 1: Core Hook Ingestion + Shared Event Model
 **Goal:** Establish canonical event normalization and HTTP ingestion server capable of receiving events from all 5 agents.
 **Mode:** standard
+**Plans:** 1 plan
+**Plan list:**
+- [x] 01-PLAN.md — establish generic hook ingestion, canonical AgentEvent model, and provider-safe session namespacing.
 **Success Criteria**:
 1. Extension HTTP server ingests raw payloads from all 5 agents.
 2. Canonical `AgentEvent` schema implemented.

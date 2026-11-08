@@ -19,24 +19,24 @@ describe('SessionRouter', () => {
 
   describe('session mapping', () => {
     it('register + resolve returns the agentId', () => {
-      router.register('sess-1', 42);
-      expect(router.resolve('sess-1')).toBe(42);
+      router.register('claude', 'sess-1', 42);
+      expect(router.resolve('claude', 'sess-1')).toBe(42);
     });
 
     it('unregister removes the mapping', () => {
-      router.register('sess-1', 42);
-      router.unregister('sess-1');
-      expect(router.resolve('sess-1')).toBeUndefined();
+      router.register('claude', 'sess-1', 42);
+      router.unregister('claude', 'sess-1');
+      expect(router.resolve('claude', 'sess-1')).toBeUndefined();
     });
 
     it('resolve returns undefined for unknown sessions', () => {
-      expect(router.resolve('unknown')).toBeUndefined();
+      expect(router.resolve('claude', 'unknown')).toBeUndefined();
     });
 
     it('hasSession checks existence', () => {
-      router.register('sess-1', 1);
-      expect(router.hasSession('sess-1')).toBe(true);
-      expect(router.hasSession('sess-2')).toBe(false);
+      router.register('claude', 'sess-1', 1);
+      expect(router.hasSession('claude', 'sess-1')).toBe(true);
+      expect(router.hasSession('claude', 'sess-2')).toBe(false);
     });
   });
 
@@ -46,22 +46,22 @@ describe('SessionRouter', () => {
     const pending = { sessionId: 'sess-ext', transcriptPath: '/a/b.jsonl', cwd: '/a' };
 
     it('storePending + confirmPending returns the info and removes it', () => {
-      router.storePending('sess-ext', pending);
-      expect(router.hasPending('sess-ext')).toBe(true);
+      router.storePending('claude', 'sess-ext', pending);
+      expect(router.hasPending('claude', 'sess-ext')).toBe(true);
 
-      const confirmed = router.confirmPending('sess-ext');
+      const confirmed = router.confirmPending('claude', 'sess-ext');
       expect(confirmed).toEqual(pending);
-      expect(router.hasPending('sess-ext')).toBe(false);
+      expect(router.hasPending('claude', 'sess-ext')).toBe(false);
     });
 
     it('confirmPending returns undefined for unknown sessions', () => {
-      expect(router.confirmPending('unknown')).toBeUndefined();
+      expect(router.confirmPending('claude', 'unknown')).toBeUndefined();
     });
 
     it('discardPending removes without returning', () => {
-      router.storePending('sess-ext', pending);
-      router.discardPending('sess-ext');
-      expect(router.hasPending('sess-ext')).toBe(false);
+      router.storePending('claude', 'sess-ext', pending);
+      router.discardPending('claude', 'sess-ext');
+      expect(router.hasPending('claude', 'sess-ext')).toBe(false);
     });
   });
 
@@ -70,44 +70,44 @@ describe('SessionRouter', () => {
   describe('event buffering', () => {
     it('bufferEvent stores events for later', () => {
       router.bufferEvent('claude', { session_id: 'sess-1', hook_event_name: 'Stop' });
-      expect(router.hasBuffered('sess-1')).toBe(true);
-      expect(router.hasBuffered('sess-2')).toBe(false);
+      expect(router.hasBuffered('claude', 'sess-1')).toBe(true);
+      expect(router.hasBuffered('claude', 'sess-2')).toBe(false);
     });
 
     it('register flushes buffered events for that session', () => {
       router.bufferEvent('claude', { session_id: 'sess-1', hook_event_name: 'Stop' });
       router.bufferEvent('claude', { session_id: 'sess-1', hook_event_name: 'PermissionRequest' });
 
-      const flushed = router.register('sess-1', 1);
+      const flushed = router.register('claude', 'sess-1', 1);
 
       expect(flushed).toHaveLength(2);
       expect(flushed[0].event.hook_event_name).toBe('Stop');
       expect(flushed[1].event.hook_event_name).toBe('PermissionRequest');
-      expect(router.hasBuffered('sess-1')).toBe(false);
+      expect(router.hasBuffered('claude', 'sess-1')).toBe(false);
     });
 
     it('register does not flush events for other sessions', () => {
       router.bufferEvent('claude', { session_id: 'sess-1', hook_event_name: 'Stop' });
       router.bufferEvent('claude', { session_id: 'sess-2', hook_event_name: 'Stop' });
 
-      const flushed = router.register('sess-1', 1);
+      const flushed = router.register('claude', 'sess-1', 1);
 
       expect(flushed).toHaveLength(1);
-      expect(router.hasBuffered('sess-2')).toBe(true);
+      expect(router.hasBuffered('claude', 'sess-2')).toBe(true);
     });
 
     it('pruneExpired removes old events', () => {
       router.bufferEvent('claude', { session_id: 'sess-old', hook_event_name: 'Stop' });
       vi.advanceTimersByTime(6_000); // > HOOK_EVENT_BUFFER_MS (5s)
       router.pruneExpired();
-      expect(router.hasBuffered('sess-old')).toBe(false);
+      expect(router.hasBuffered('claude', 'sess-old')).toBe(false);
     });
 
     it('preserves recent events during prune', () => {
       router.bufferEvent('claude', { session_id: 'sess-new', hook_event_name: 'Stop' });
       vi.advanceTimersByTime(1_000); // < HOOK_EVENT_BUFFER_MS
       router.pruneExpired();
-      expect(router.hasBuffered('sess-new')).toBe(true);
+      expect(router.hasBuffered('claude', 'sess-new')).toBe(true);
     });
   });
 
@@ -115,8 +115,8 @@ describe('SessionRouter', () => {
 
   describe('dispose', () => {
     it('clears all state', () => {
-      router.register('sess-1', 1);
-      router.storePending('sess-ext', {
+      router.register('claude', 'sess-1', 1);
+      router.storePending('claude', 'sess-ext', {
         sessionId: 'sess-ext',
         transcriptPath: undefined,
         cwd: '/',
@@ -125,9 +125,9 @@ describe('SessionRouter', () => {
 
       router.dispose();
 
-      expect(router.resolve('sess-1')).toBeUndefined();
-      expect(router.hasPending('sess-ext')).toBe(false);
-      expect(router.hasBuffered('sess-2')).toBe(false);
+      expect(router.resolve('claude', 'sess-1')).toBeUndefined();
+      expect(router.hasPending('claude', 'sess-ext')).toBe(false);
+      expect(router.hasBuffered('claude', 'sess-2')).toBe(false);
     });
   });
 });
