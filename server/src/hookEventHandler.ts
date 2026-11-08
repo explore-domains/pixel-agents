@@ -118,7 +118,7 @@ export class HookEventHandler {
   }
 
   handleEvent(providerId: string, rawEvent: Record<string, unknown>): void {
-    const provider = hookProviderById(providerId) ?? this.provider;
+    const provider = (providerId === this.provider.id) ? this.provider : (hookProviderById(providerId) ?? this.provider);
     if (debug)
       console.log(
         `[Pixel Agents] Hook: handleEvent(provider=${providerId}) rawEvent:`,
