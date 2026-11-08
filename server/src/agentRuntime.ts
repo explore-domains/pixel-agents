@@ -200,6 +200,7 @@ export class AgentRuntime {
           return;
         }
         adoptExternalSessionFromHook(
+          providerId,
           sessionId,
           transcriptPath,
           cwd,
@@ -515,6 +516,7 @@ export class AgentRuntime {
         teamUsesTmux: p.teamUsesTmux,
         palette: p.palette,
         hueShift: p.hueShift,
+        providerId: p.providerId,
       });
 
       assignPaletteIfNeeded(agent, this.store);
@@ -537,7 +539,7 @@ export class AgentRuntime {
         /* ignore stat errors on restore */
       }
 
-      this.registerAgent(agent.sessionId, agent.id);
+      this.registerAgent(agent.sessionId, agent.id, p.providerId);
 
       if (p.id > maxId) maxId = p.id;
       console.log(

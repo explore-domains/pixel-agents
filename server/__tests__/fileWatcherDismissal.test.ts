@@ -503,6 +503,7 @@ describe('fileWatcher dismissal state', () => {
         nextAgentIdRef.current = 2;
 
         adoptExternalSessionFromHook(
+          'claude',
           'workspace-session',
           file,
           projectDir,

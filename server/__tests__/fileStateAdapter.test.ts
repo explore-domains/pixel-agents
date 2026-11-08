@@ -134,6 +134,7 @@ describe('FileStateAdapter', () => {
       {
         id: 1,
         sessionId: 'sess-1',
+        providerId: 'claude',
         terminalName: 'Claude Code #1',
         jsonlFile: '/tmp/sess-1.jsonl',
         projectDir: '/tmp/proj',
@@ -154,10 +155,10 @@ describe('FileStateAdapter', () => {
     const vscode = new FileStateAdapter({ namespace: 'vscode' });
     const standalone = new FileStateAdapter({ namespace: 'standalone' });
     const agentVs: PersistedAgent[] = [
-      { id: 1, terminalName: 'A', jsonlFile: '/a.jsonl', projectDir: '/proj' },
+      { id: 1, providerId: 'claude', terminalName: 'A', jsonlFile: '/a.jsonl', projectDir: '/proj' },
     ];
     const agentSa: PersistedAgent[] = [
-      { id: 9, terminalName: '', jsonlFile: '/b.jsonl', projectDir: '/proj' },
+      { id: 9, providerId: 'claude', terminalName: '', jsonlFile: '/b.jsonl', projectDir: '/proj' },
     ];
     vscode.saveAgents(agentVs);
     standalone.saveAgents(agentSa);
@@ -168,7 +169,7 @@ describe('FileStateAdapter', () => {
   it('preserves seats when saving agents (and vice versa)', () => {
     const adapter = new FileStateAdapter({ namespace: 'standalone' });
     adapter.saveSeats({ '1': { palette: 3 } });
-    adapter.saveAgents([{ id: 1, terminalName: 'x', jsonlFile: '/x.jsonl', projectDir: '/tmp' }]);
+    adapter.saveAgents([{ id: 1, providerId: 'claude', terminalName: 'x', jsonlFile: '/x.jsonl', projectDir: '/tmp' }]);
     expect(adapter.loadSeats()).toEqual({ '1': { palette: 3 } });
     expect(adapter.loadAgents()).toHaveLength(1);
   });

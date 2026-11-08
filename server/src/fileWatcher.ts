@@ -513,6 +513,7 @@ function adoptTerminalForFile(
     projectDir,
     jsonlFile,
     fileOffset,
+    providerId: hookProvider?.id,
   });
 
   assignPaletteIfNeeded(agent, agents);
@@ -719,6 +720,7 @@ export function scanForTeammateFiles(
       leadAgentId: parentAgentId,
       teamName: parentAgent?.teamName,
       teamUsesTmux: parentAgent?.teamUsesTmux,
+      providerId: teamProvider?.providerId || hookProvider?.id,
     });
 
     if (parentAgent?.palette !== undefined) {
@@ -858,6 +860,7 @@ export function scanForBackgroundAgentFiles(
       agentName: entry.name,
       leadAgentId: leadId,
       spawnToolUseId: entry.toolUseId,
+      providerId: teamProvider?.providerId || hookProvider?.id,
     });
 
     if (lead.palette !== undefined) {
@@ -1011,6 +1014,7 @@ export function scanAllTeammateFiles(
  * transcript_path and cwd directly, no scanning needed.
  */
 export function adoptExternalSessionFromHook(
+  providerId: string,
   sessionId: string,
   transcriptPath: string | undefined,
   cwd: string,
@@ -1052,6 +1056,7 @@ export function adoptExternalSessionFromHook(
       waitingTimers,
       permissionTimers,
       persistAgents,
+      providerId,
       directoryName,
     );
 
@@ -1081,6 +1086,7 @@ export function adoptExternalSessionFromHook(
       hooksOnly: true,
       lastDataAt: Date.now(),
       directoryName,
+      providerId,
     });
     assignPaletteIfNeeded(agent, agents);
     agents.set(id, agent);
@@ -1105,6 +1111,7 @@ function adoptExternalSession(
   permissionTimers: Map<number, ReturnType<typeof setTimeout>>,
 
   persistAgents: () => void,
+  providerId?: string,
   directoryName?: string,
 ): void {
   const id = nextAgentIdRef.current++;
@@ -1146,6 +1153,7 @@ function adoptExternalSession(
     fileOffset,
     lastDataAt: Date.now(),
     directoryName,
+    providerId,
   });
 
   assignPaletteIfNeeded(agent, agents);
@@ -1384,6 +1392,7 @@ export function scanExternalDir(
       waitingTimers,
       permissionTimers,
       persistAgents,
+      hookProvider?.id,
     );
   }
 }
@@ -1473,6 +1482,7 @@ function scanGlobalProjectDirs(
         waitingTimers,
         permissionTimers,
         persistAgents,
+        hookProvider?.id,
         directoryName,
       );
     }

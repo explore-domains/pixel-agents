@@ -106,6 +106,7 @@ describe('migrateVsCodeState', () => {
       {
         id: 1,
         sessionId: 'sess-1',
+        providerId: 'claude',
         terminalName: 'Claude Code #1',
         jsonlFile: '/tmp/sess-1.jsonl',
         projectDir: '/tmp/proj',

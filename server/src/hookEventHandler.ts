@@ -171,7 +171,7 @@ export class HookEventHandler {
       }
       // Check auto-discovery (agent exists but not yet registered for hooks)
       for (const [id, agent] of this.agents) {
-        if (agent.sessionId === sessionId) {
+        if (agent.sessionId === sessionId && (agent.providerId || 'claude') === providerId) {
           this.registerAgent(providerId, agent.sessionId, id);
           agent.hookDelivered = true;
           if (debug)
@@ -259,7 +259,7 @@ export class HookEventHandler {
     let agentId = this.sessionRouter.resolve(providerId, sessionId);
     if (agentId === undefined) {
       for (const [id, agent] of this.agents) {
-        if (agent.sessionId === sessionId) {
+        if (agent.sessionId === sessionId && (agent.providerId || 'claude') === providerId) {
           this.registerAgent(providerId, agent.sessionId, id);
           agentId = id;
           break;
