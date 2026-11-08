@@ -2,30 +2,37 @@
 
 ## What This Is
 
-A VS Code extension and standalone tool that brings AI coding agents to life as animated pixel art characters in a virtual office. Originally built for Claude Code as Pixel Agents, ED Pixel Agents expands agent support to other popular coding agents—prioritizing Antigravity, alongside Gemini CLI, OpenCode, and GitHub Copilot—with updated branding and multi-agent lifecycle awareness.
+A VS Code extension and standalone tool that brings AI coding agents to life as animated pixel art characters in a virtual office. ED Pixel Agents supports Claude Code, Antigravity, Gemini CLI, OpenCode, and GitHub Copilot with multi-agent lifecycle awareness and real-time visualization.
 
 ## Core Value
 
 Provide delightful, accurate, real-time pixel art visualization and workspace status for developers using modern AI coding agents (Antigravity, Claude Code, Gemini CLI, OpenCode, and Copilot).
+
+## Current State
+
+**Milestone v1.0 Shipped ✅ (2026-11-08)**
+- Multi-provider ingestion server with canonical `AgentEvent` model.
+- Provider-scoped session routing and collision prevention (deterministic hue shifting).
+- Full adapter support for Antigravity, Gemini, OpenCode, and Copilot.
+- Office capacity expanded to 5 simultaneous agents.
+- Project rebranded to **ED Pixel Agents**.
 
 ## Requirements
 
 ### Validated
 
 - ✓ Pixel art office canvas and character animation engine — existing
-- ✓ Claude Code `HookProvider` reference implementation with session lifecycle tracking — existing
-- ✓ VS Code extension integration and webview UI — existing
 - ✓ Multi-server registry and HTTP hook dispatch listener — existing
 - ✓ Interactive consent gating and permission-exempt tool definitions — existing
+- ✓ Multi-provider ingestion server and event normalization — v1.0
+- ✓ Provider-scoped session routing and palette collision detection — v1.0
+- ✓ Antigravity, Gemini, OpenCode, and Copilot adapters — v1.0
+- ✓ Rebrand to "ED Pixel Agents" — v1.0
 
 ### Active
 
-- [ ] Rebrand project to "ED Pixel Agents" across extension manifest, UI titles, and documentation
-- [ ] Map and document existing codebase architecture (core, server, adapters, webview-ui)
-- [ ] Explore and document hook/event mechanisms for Antigravity, Gemini CLI, OpenCode, and Copilot
-- [ ] Implement `HookProvider` for Antigravity (`antigravity-hook`, event normalization, installer)
-- [ ] Implement `HookProvider`s for Gemini CLI, OpenCode, and Copilot
-- [ ] Verify multi-agent presence and activity in the pixel office simultaneously
+- [ ] Optimize webview performance for long-running high-event sessions
+- [ ] Implement agent-specific idle animations based on hook activity pauses
 
 ### Out of Scope
 
@@ -37,16 +44,16 @@ Provide delightful, accurate, real-time pixel art visualization and workspace st
 
 - **Codebase Layout**:
   - `core/`: Shared types (`HookProvider`, `AgentEvent`), asset definitions, protocol constants
-  - `server/`: HTTP microserver, `HookEventHandler`, session router, consent flow
+  - `server/`: HTTP microserver, `HookEventHandler`, session router, consent flow, and provider adapters
   - `adapters/vscode/`: Extension host entrypoint, webview provider, terminal adapter
   - `webview-ui/`: React + canvas frontend rendering the office and character animations
 - **Installed Agent Toolchains**:
-  - Antigravity CLI (`agy` v1.5.3) with plugin/hooks and customizations system
+  - Antigravity CLI (`agy` v1.5.3)
   - Google Gemini CLI (`gemini` v0.67.0)
   - OpenCode (`opencode` v1.18.31)
-  - GitHub Copilot CLI (`copilot` v1.0.107) and VS Code extension
+  - GitHub Copilot CLI (`copilot` v1.0.107)
 - **Integration Model**:
-  - Each agent CLI hooks into lifecycle events (`SessionStart`, `ToolStart`, `ToolEnd`, `Stop`, etc.) and posts payloads to Pixel Agents' local HTTP server (`HOOK_API_PREFIX`).
+  - Agents post lifecycle events (`SessionStart`, `ToolStart`, `ToolEnd`, `Stop`) to a local HTTP server which normalizes them into `AgentEvent` objects and routes them to the pixel office.
 
 ## Constraints
 
@@ -59,26 +66,13 @@ Provide delightful, accurate, real-time pixel art visualization and workspace st
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Phased Roadmap (Learn & Rename → Explore Hooks → Implement Providers) | Ensures solid understanding of the architecture and clean branding before integrating new CLIs | — Pending |
-| Prioritize Antigravity as first new `HookProvider` | Antigravity is active in the environment, actively used, and supports rich custom extensions/hooks | — Pending |
-| Rebrand displayName to "ED Pixel Agents" while keeping core stability | Updates user-facing identity, extension title, and UI without unnecessarily breaking existing storage keys | — Pending |
+| Provider-namespaced session routing | Prevents session ID collisions across different agent providers | — Implemented (v1.0) |
+| Deterministic hue shifting for collisions | Ensures visual distinction when multiple agents overlap or share palettes | — Implemented (v1.0) |
+| Bounded async event queue | Hardens the ingestion server against event spikes and prevents memory leaks | — Implemented (v1.0) |
 
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
 
-**After each phase transition** (via `/gsd-transition`):
-1. Requirements invalidated? → Move to Out of Scope with reason
-2. Requirements validated? → Move to Validated with phase reference
-3. New requirements emerged? → Add to Active
-4. Decisions to log? → Add to Key Decisions
-5. "What This Is" still accurate? → Update if drifted
-
-**After each milestone** (via `/gsd-complete-milestone`):
-1. Full review of all sections
-2. Core Value check — still the right priority?
-3. Audit Out of Scope — reasons still valid?
-4. Update Context with current state
-
 ---
-*Last updated: 2026-11-08 after initialization*
+*Last updated: 2026-11-08 after v1.0 completion*
