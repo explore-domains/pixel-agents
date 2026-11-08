@@ -47,6 +47,8 @@ export type AgentEvent =
        *  reported its task done. Some providers emit only one; both route to the
        *  same handler but with different downstream cleanup. */
       reason: 'idle' | 'completed';
+      /** Teammate name for routing in multi-agent sessions. */
+      teammateName?: string;
     }
   | { kind: 'progress'; toolId: string; data: unknown }
   | { kind: 'permissionRequest' }

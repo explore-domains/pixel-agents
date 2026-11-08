@@ -136,6 +136,30 @@ function registerHealthRoute(app: FastifyInstance): void {
 
 // ── Hook Events ────────────────────────────────────────────────
 
+const hookQueue: Array<{ providerId: string; event: Record<string, unknown> }> = [];
+const MAX_HOOK_QUEUE_SIZE = 1000;
+let isProcessingHookQueue = false;
+
+async function processHookQueue(onHookEvent: HttpServerOptions['onHookEvent']): Promise<void> {
+  if (isProcessingHookQueue) return;
+  isProcessingHookQueue = true;
+
+  while (hookQueue.length > 0) {
+    const item = hookQueue.shift();
+    if (item) {
+      try {
+        onHookEvent?.(item.providerId, item.event);
+      } catch (err) {
+        console.error('[Pixel Agents] Hook: error processing queued event:', err);
+      }
+    }
+    // Yield to event loop between events
+    await new Promise((resolve) => setImmediate(resolve));
+  }
+
+  isProcessingHookQueue = false;
+}
+
 function registerHookRoute(app: FastifyInstance, options: HttpServerOptions): void {
   app.post<{
     Params: { providerId: string };
@@ -158,11 +182,16 @@ function registerHookRoute(app: FastifyInstance, options: HttpServerOptions): vo
       const { providerId } = request.params;
       const event = request.body;
 
-      if (event.session_id && event.hook_event_name) {
-        options.onHookEvent?.(providerId, event);
+      // Validate basic shape before enqueueing
+      if (typeof event.session_id === 'string') {
+        if (hookQueue.length >= MAX_HOOK_QUEUE_SIZE) {
+          hookQueue.shift(); // Evict oldest on overflow
+        }
+        hookQueue.push({ providerId, event });
+        processHookQueue(options.onHookEvent).catch(() => {});
       }
 
-      reply.send('ok');
+      reply.code(202).send('Accepted');
     },
   );
 }
