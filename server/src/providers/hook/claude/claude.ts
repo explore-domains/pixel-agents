@@ -230,12 +230,22 @@ function normalizeHookEvent(
     case 'TeammateIdle':
       return {
         sessionId,
-        event: { kind: 'subagentTurnEnd', parentToolId: 'current', reason: 'idle' },
+        event: {
+          kind: 'subagentTurnEnd',
+          parentToolId: 'current',
+          reason: 'idle',
+          teammateName: claudeTeamProvider.extractTeammateNameFromEvent(raw),
+        },
       };
     case 'TaskCompleted':
       return {
         sessionId,
-        event: { kind: 'subagentTurnEnd', parentToolId: 'current', reason: 'completed' },
+        event: {
+          kind: 'subagentTurnEnd',
+          parentToolId: 'current',
+          reason: 'completed',
+          teammateName: claudeTeamProvider.extractTeammateNameFromEvent(raw),
+        },
       };
 
     // TaskCreated is informational; no AgentEvent shape fits it. Drop. No
