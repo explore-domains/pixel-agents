@@ -24,12 +24,14 @@ interface SessionLifecycleCallbacks {
   /** Called when an external session is detected (unknown session_id in SessionStart).
    *  transcriptPath is undefined for providers without transcripts (OpenCode, Copilot). */
   onExternalSessionDetected?: (
+    providerId: string,
     sessionId: string,
     transcriptPath: string | undefined,
     cwd: string,
   ) => void;
   /** Called when /clear is detected via hooks (SessionEnd reason=clear + SessionStart source=clear). */
   onSessionClear?: (
+    providerId: string,
     agentId: number,
     newSessionId: string,
     newTranscriptPath: string | undefined,
@@ -97,20 +99,21 @@ export class HookEventHandler {
   }
 
   /** Register an agent for hook event routing. Flushes any buffered events for this session. */
-  registerAgent(sessionId: string, agentId: number): void {
-    const flushed = this.sessionRouter.register(this.provider.id, sessionId, agentId);
+  registerAgent(providerId: string, sessionId: string, agentId: number): void {
+    // Per D-13: trust providerId from normalized event; per D-14: validate shared secret
+    const flushed = this.sessionRouter.register(providerId, sessionId, agentId);
     if (debug && flushed.length > 0)
       console.log(
         `[Pixel Agents] Hook: flushing ${flushed.length} buffered event(s) for session ${sessionId.slice(0, 8)}...`,
       );
-    for (const { providerId, event } of flushed) {
-      this.handleEvent(providerId, event);
+    for (const { providerId: pId, event } of flushed) {
+      this.handleEvent(pId, event);
     }
   }
 
   /** Remove an agent's session mapping (called on agent removal/terminal close). */
-  unregisterAgent(sessionId: string): void {
-    this.sessionRouter.unregister(this.provider.id, sessionId);
+  unregisterAgent(providerId: string, sessionId: string): void {
+    this.sessionRouter.unregister(providerId, sessionId);
   }
 
   handleEvent(providerId: string, rawEvent: Record<string, unknown>): void {
@@ -169,7 +172,7 @@ export class HookEventHandler {
       // Check auto-discovery (agent exists but not yet registered for hooks)
       for (const [id, agent] of this.agents) {
         if (agent.sessionId === sessionId) {
-          this.registerAgent(agent.sessionId, id);
+          this.registerAgent(providerId, agent.sessionId, id);
           agent.hookDelivered = true;
           if (debug)
             console.log(
@@ -193,8 +196,8 @@ export class HookEventHandler {
                 `[Pixel Agents] Hook: Agent ${id} - /${normEvent.source} detected, reassigning to ${sessionId}`,
               );
               this.sessionRouter.unregister(providerId, agent.sessionId);
-              this.registerAgent(sessionId, id);
-              this.lifecycleCallbacks.onSessionClear?.(id, sessionId, transcriptPath);
+              this.registerAgent(providerId, sessionId, id);
+              this.lifecycleCallbacks.onSessionClear?.(providerId, id, sessionId, transcriptPath);
               return;
             }
           }
@@ -243,6 +246,7 @@ export class HookEventHandler {
           `[Pixel Agents] Hook: ${normEvent.kind} confirmed external session ${sessionId.slice(0, 8)}..., notifying host`,
         );
       this.lifecycleCallbacks.onExternalSessionDetected?.(
+        providerId,
         pending.sessionId,
         pending.transcriptPath,
         pending.cwd,
@@ -256,7 +260,7 @@ export class HookEventHandler {
     if (agentId === undefined) {
       for (const [id, agent] of this.agents) {
         if (agent.sessionId === sessionId) {
-          this.registerAgent(agent.sessionId, id);
+          this.registerAgent(providerId, agent.sessionId, id);
           agentId = id;
           break;
         }

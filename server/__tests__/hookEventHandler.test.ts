@@ -75,7 +75,7 @@ describe('HookEventHandler', () => {
   it('PermissionRequest sends agentToolPermission', () => {
     const agent = createTestAgent({ id: 1 });
     agents.set(1, agent);
-    handler.registerAgent('sess-1', 1);
+    handler.registerAgent('claude', 'sess-1', 1);
 
     handler.handleEvent('claude', {
       hook_event_name: 'PermissionRequest',
@@ -90,7 +90,7 @@ describe('HookEventHandler', () => {
   it('PermissionRequest cancels permission timer', () => {
     const agent = createTestAgent({ id: 1 });
     agents.set(1, agent);
-    handler.registerAgent('sess-1', 1);
+    handler.registerAgent('claude', 'sess-1', 1);
 
     const timer = setTimeout(() => {}, 10000);
     permissionTimers.set(1, timer);
@@ -107,7 +107,7 @@ describe('HookEventHandler', () => {
     const agent = createTestAgent({ id: 1 });
     agent.activeSubagentToolNames.set('tool-parent', new Map([['sub-1', 'Read']]));
     agents.set(1, agent);
-    handler.registerAgent('sess-1', 1);
+    handler.registerAgent('claude', 'sess-1', 1);
 
     handler.handleEvent('claude', {
       hook_event_name: 'PermissionRequest',
@@ -124,7 +124,7 @@ describe('HookEventHandler', () => {
   it('Notification permission_prompt sends agentToolPermission', () => {
     const agent = createTestAgent({ id: 1 });
     agents.set(1, agent);
-    handler.registerAgent('sess-1', 1);
+    handler.registerAgent('claude', 'sess-1', 1);
 
     handler.handleEvent('claude', {
       hook_event_name: 'Notification',
@@ -140,7 +140,7 @@ describe('HookEventHandler', () => {
   it('Notification idle_prompt marks agent waiting', () => {
     const agent = createTestAgent({ id: 1 });
     agents.set(1, agent);
-    handler.registerAgent('sess-1', 1);
+    handler.registerAgent('claude', 'sess-1', 1);
 
     handler.handleEvent('claude', {
       hook_event_name: 'Notification',
@@ -162,7 +162,7 @@ describe('HookEventHandler', () => {
   it('Stop marks agent waiting without awaitingInput (Done)', () => {
     const agent = createTestAgent({ id: 1 });
     agents.set(1, agent);
-    handler.registerAgent('sess-1', 1);
+    handler.registerAgent('claude', 'sess-1', 1);
 
     handler.handleEvent('claude', {
       hook_event_name: 'Stop',
@@ -188,7 +188,7 @@ describe('HookEventHandler', () => {
     agent.activeToolNames.set('bg-tool', 'Agent');
     agent.backgroundAgentToolIds.add('bg-tool');
     agents.set(1, agent);
-    handler.registerAgent('sess-1', 1);
+    handler.registerAgent('claude', 'sess-1', 1);
 
     handler.handleEvent('claude', {
       hook_event_name: 'Stop',
@@ -210,7 +210,7 @@ describe('HookEventHandler', () => {
   it('sets hookDelivered flag on agent', () => {
     const agent = createTestAgent({ id: 1, hookDelivered: false } as Partial<AgentState>);
     agents.set(1, agent);
-    handler.registerAgent('sess-1', 1);
+    handler.registerAgent('claude', 'sess-1', 1);
 
     handler.handleEvent('claude', {
       hook_event_name: 'Stop',
@@ -307,7 +307,7 @@ describe('HookEventHandler', () => {
   // ── Dispose ─────────────────────────────────────────────────
 
   it('dispose cleans up timers and maps', () => {
-    handler.registerAgent('sess-1', 1);
+    handler.registerAgent('claude', 'sess-1', 1);
     handler.dispose();
     expect(() => handler.dispose()).not.toThrow();
   });
@@ -317,7 +317,7 @@ describe('HookEventHandler', () => {
   it('SessionStart for known agent sets hookDelivered', () => {
     const agent = createTestAgent({ id: 1, hookDelivered: false } as Partial<AgentState>);
     agents.set(1, agent);
-    handler.registerAgent('sess-1', 1);
+    handler.registerAgent('claude', 'sess-1', 1);
 
     handler.handleEvent('claude', {
       hook_event_name: 'SessionStart',
@@ -364,7 +364,7 @@ describe('HookEventHandler', () => {
       transcript_path: '/projects/test/new-sess.jsonl',
     });
 
-    expect(onSessionClear).toHaveBeenCalledWith(1, 'new-sess', '/projects/test/new-sess.jsonl');
+    expect(onSessionClear).toHaveBeenCalledWith('claude', 1, 'new-sess', '/projects/test/new-sess.jsonl');
     expect(agent.pendingClear).toBe(false);
   });
 
@@ -386,7 +386,7 @@ describe('HookEventHandler', () => {
   it('SessionEnd(reason=clear) sets pendingClear and marks waiting', () => {
     const agent = createTestAgent({ id: 1 });
     agents.set(1, agent);
-    handler.registerAgent('sess-1', 1);
+    handler.registerAgent('claude', 'sess-1', 1);
 
     handler.handleEvent('claude', {
       hook_event_name: 'SessionEnd',
@@ -401,7 +401,7 @@ describe('HookEventHandler', () => {
   it('SessionEnd(reason=exit) calls onSessionEnd immediately', () => {
     const agent = createTestAgent({ id: 1 });
     agents.set(1, agent);
-    handler.registerAgent('sess-1', 1);
+    handler.registerAgent('claude', 'sess-1', 1);
 
     const onSessionEnd = vi.fn();
     handler.setLifecycleCallbacks({ onSessionEnd });
@@ -420,7 +420,7 @@ describe('HookEventHandler', () => {
   it('SessionEnd(reason=resume) delays onSessionEnd for SESSION_END_GRACE_MS', async () => {
     const agent = createTestAgent({ id: 1 });
     agents.set(1, agent);
-    handler.registerAgent('sess-1', 1);
+    handler.registerAgent('claude', 'sess-1', 1);
 
     const onSessionEnd = vi.fn();
     handler.setLifecycleCallbacks({ onSessionEnd });
@@ -468,7 +468,7 @@ describe('HookEventHandler', () => {
   it('PreToolUse sends agentToolStart with formatted status', () => {
     const agent = createTestAgent({ id: 1, isWaiting: true });
     agents.set(1, agent);
-    handler.registerAgent('sess-1', 1);
+    handler.registerAgent('claude', 'sess-1', 1);
 
     handler.handleEvent('claude', {
       hook_event_name: 'PreToolUse',
@@ -487,7 +487,7 @@ describe('HookEventHandler', () => {
   it('PreToolUse marks agent active and cancels waiting', () => {
     const agent = createTestAgent({ id: 1, isWaiting: true });
     agents.set(1, agent);
-    handler.registerAgent('sess-1', 1);
+    handler.registerAgent('claude', 'sess-1', 1);
 
     handler.handleEvent('claude', {
       hook_event_name: 'PreToolUse',
@@ -508,7 +508,7 @@ describe('HookEventHandler', () => {
     const agent = createTestAgent({ id: 1 });
     agent.currentHookToolId = 'hook-123';
     agents.set(1, agent);
-    handler.registerAgent('sess-1', 1);
+    handler.registerAgent('claude', 'sess-1', 1);
 
     handler.handleEvent('claude', {
       hook_event_name: 'PostToolUse',
@@ -525,7 +525,7 @@ describe('HookEventHandler', () => {
     const agent = createTestAgent({ id: 1 });
     agent.currentHookToolId = 'hook-456';
     agents.set(1, agent);
-    handler.registerAgent('sess-1', 1);
+    handler.registerAgent('claude', 'sess-1', 1);
 
     handler.handleEvent('claude', {
       hook_event_name: 'PostToolUseFailure',
@@ -556,14 +556,14 @@ describe('HookEventHandler', () => {
     expect(onExternalSessionDetected).not.toHaveBeenCalled();
 
     // Simulate the provider creating the agent (callback side effect)
-    onExternalSessionDetected.mockImplementation((sessionId: string) => {
+    onExternalSessionDetected.mockImplementation((pId: string, sessionId: string) => {
       const agent = createTestAgent({
         id: 2,
         sessionId,
         projectDir: '/projects/test',
       } as Partial<AgentState>);
       agents.set(2, agent);
-      handler.registerAgent(sessionId, 2);
+      handler.registerAgent(pId, sessionId, 2);
     });
 
     // Stop confirms the session -> creates agent -> re-processes Stop
@@ -573,6 +573,7 @@ describe('HookEventHandler', () => {
     });
 
     expect(onExternalSessionDetected).toHaveBeenCalledWith(
+      'claude',
       'ext-sess',
       '/projects/test/ext-sess.jsonl',
       '/projects/test',
@@ -630,6 +631,7 @@ describe('HookEventHandler', () => {
     });
     expect(agent.pendingClear).toBe(false);
     expect(onSessionClear).toHaveBeenCalledWith(
+      'claude',
       1,
       'new-resume-sess',
       '/projects/test/new-resume-sess.jsonl',
@@ -674,6 +676,7 @@ describe('HookEventHandler', () => {
     });
 
     expect(onSessionClear).toHaveBeenCalledWith(
+      'claude',
       1,
       'new-resume-sess',
       '/projects/test/new-resume-sess.jsonl',
@@ -701,14 +704,14 @@ describe('HookEventHandler', () => {
     expect(onExternalSessionDetected).not.toHaveBeenCalled();
 
     // Simulate agent creation on confirmation
-    onExternalSessionDetected.mockImplementation((sessionId: string) => {
+    onExternalSessionDetected.mockImplementation((pId: string, sessionId: string) => {
       const agent = createTestAgent({
         id: 2,
         sessionId,
         projectDir: '/projects/test',
       } as Partial<AgentState>);
       agents.set(2, agent);
-      handler.registerAgent(sessionId, 2);
+      handler.registerAgent(pId, sessionId, 2);
     });
 
     // Confirmation event creates agent
@@ -718,6 +721,7 @@ describe('HookEventHandler', () => {
     });
 
     expect(onExternalSessionDetected).toHaveBeenCalledWith(
+      'claude',
       'no-transcript-sess',
       undefined,
       '/projects/test',
@@ -744,7 +748,7 @@ describe('HookEventHandler', () => {
       cwd: '/projects/test',
     });
 
-    expect(onSessionClear).toHaveBeenCalledWith(1, 'resumed-sess', undefined);
+    expect(onSessionClear).toHaveBeenCalledWith('claude', 1, 'resumed-sess', undefined);
     expect(agent.pendingClear).toBe(false);
   });
 
@@ -775,7 +779,7 @@ describe('HookEventHandler', () => {
     it(`sets currentHookIsTeammateSpawn=${expected}`, () => {
       const agent = createTestAgent({ id: 1 });
       agents.set(1, agent);
-      handler.registerAgent('sess-1', 1);
+      handler.registerAgent('claude', 'sess-1', 1);
 
       handler.handleEvent('claude', {
         hook_event_name: 'PreToolUse',
@@ -828,7 +832,7 @@ describe('HookEventHandler', () => {
         agent.currentHookToolName = 'Agent';
       }
       agents.set(1, agent);
-      handler.registerAgent('sess-1', 1);
+      handler.registerAgent('claude', 'sess-1', 1);
 
       const onTeammateDetected = vi.fn();
       handler.setLifecycleCallbacks({ onTeammateDetected });
