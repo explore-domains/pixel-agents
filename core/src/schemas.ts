@@ -15,6 +15,7 @@
 export interface PersistedAgent {
   id: number;
   sessionId?: string;
+  providerId: string;
   terminalName: string;
   isExternal?: boolean;
   jsonlFile: string;

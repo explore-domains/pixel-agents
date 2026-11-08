@@ -90,6 +90,7 @@ export interface AgentState {
 export interface PersistedAgent {
   id: number;
   sessionId?: string;
+  providerId: string;
   /** Terminal name — empty string for extension panel sessions */
   terminalName: string;
   /** Whether this agent was detected from an external source */

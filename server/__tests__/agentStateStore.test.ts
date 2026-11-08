@@ -170,6 +170,21 @@ describe('AgentStateStore', () => {
       expect(saved[0].isTeamLead).toBe(true);
     });
 
+    it('persist includes providerId (or defaults to claude)', () => {
+      const adapter = createMockAdapter();
+      store.setAdapter(adapter);
+
+      store.set(1, createTestAgent({ id: 1, providerId: 'antigravity' }));
+      store.set(2, createTestAgent({ id: 2 })); // missing providerId
+
+      store.persist();
+
+      const saved = (adapter.saveAgents as ReturnType<typeof vi.fn>).mock.calls[0][0] as PersistedAgent[];
+      expect(saved).toHaveLength(2);
+      expect(saved.find((a) => a.id === 1)?.providerId).toBe('antigravity');
+      expect(saved.find((a) => a.id === 2)?.providerId).toBe('claude');
+    });
+
     it('persist without adapter is a no-op', () => {
       store.set(1, createTestAgent({ id: 1 }));
       // Should not throw

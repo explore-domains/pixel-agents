@@ -105,7 +105,12 @@ export class FileStateAdapter implements StateAdapter {
       const raw = fs.readFileSync(this.stateFilePath, 'utf-8');
       const parsed = JSON.parse(raw) as Partial<AdapterState>;
       return {
-        agents: Array.isArray(parsed.agents) ? (parsed.agents as PersistedAgent[]) : [],
+        agents: Array.isArray(parsed.agents)
+          ? (parsed.agents as PersistedAgent[]).map((a) => ({
+              ...a,
+              providerId: a.providerId || 'claude',
+            }))
+          : [],
         seats:
           parsed.seats && typeof parsed.seats === 'object'
             ? (parsed.seats as AdapterState['seats'])
