@@ -12,6 +12,9 @@ import type { AgentState } from './types.js';
 
 const debug = process.env.PIXEL_AGENTS_DEBUG !== '0';
 
+const hookProcessingTimings: number[] = [];
+const MAX_TIMINGS = 100;
+
 /**
  * Dispatches normalized AgentEvents to agents based on session_id.
  * Session routing (session→agent mapping, pending sessions, event buffering)
@@ -118,12 +121,20 @@ export class HookEventHandler {
   }
 
   handleEvent(providerId: string, rawEvent: Record<string, unknown>): void {
-    const provider = (providerId === this.provider.id) ? this.provider : (hookProviderById(providerId) ?? this.provider);
+    const provider =
+      providerId === this.provider.id ? this.provider : hookProviderById(providerId);
+
+    if (!provider) {
+      if (debug) console.warn(`[Pixel Agents] Hook: Unknown provider "${providerId}", dropping event`);
+      return;
+    }
+
     if (debug)
       console.log(
         `[Pixel Agents] Hook: handleEvent(provider=${providerId}) rawEvent:`,
         JSON.stringify(rawEvent),
       );
+
     if (provider.protocolVersion !== HookEventHandler.SUPPORTED_PROTOCOL_VERSION) {
       if (debug) console.warn(`[Pixel Agents] Hook: Protocol version mismatch for ${providerId}`);
       return; // version mismatch already logged in constructor
@@ -364,6 +375,14 @@ export class HookEventHandler {
     provider: HookProvider,
   ): void {
     const reason = normEvent.reason;
+
+    // Guard: already handling a clear/resume for this agent?
+    if (agent.pendingClear && (reason === 'clear' || reason === 'resume')) {
+      if (debug)
+        console.log(`[Pixel Agents] Hook: Agent ${agentId} - skipping duplicate SessionEnd(${reason})`);
+      return;
+    }
+
     if (debug)
       console.log(
         `[Pixel Agents] Hook: Agent ${agentId} - SessionEnd(reason=${reason ?? 'unknown'})`,

@@ -136,28 +136,36 @@ function registerHealthRoute(app: FastifyInstance): void {
 
 // ── Hook Events ────────────────────────────────────────────────
 
-const hookQueue: Array<{ providerId: string; event: Record<string, unknown> }> = [];
+const hookQueue: Array<{ providerId: string; event: Record<string, unknown>; enqueuedAt: number }> = [];
+const hookEventTimings: Array<number> = [];
 const MAX_HOOK_QUEUE_SIZE = 1000;
+const MAX_TIMINGS = 100;
 let isProcessingHookQueue = false;
 
 async function processHookQueue(onHookEvent: HttpServerOptions['onHookEvent']): Promise<void> {
   if (isProcessingHookQueue) return;
   isProcessingHookQueue = true;
 
-  while (hookQueue.length > 0) {
-    const item = hookQueue.shift();
-    if (item) {
-      try {
-        onHookEvent?.(item.providerId, item.event);
-      } catch (err) {
-        console.error('[Pixel Agents] Hook: error processing queued event:', err);
+  try {
+    while (hookQueue.length > 0) {
+      const item = hookQueue.shift();
+      if (item) {
+        hookEventTimings.push(Date.now() - item.enqueuedAt);
+        if (hookEventTimings.length > MAX_TIMINGS) {
+          hookEventTimings.shift();
+        }
+        try {
+          onHookEvent?.(item.providerId, item.event);
+        } catch (err) {
+          console.error('[Pixel Agents] Hook: error processing queued event:', err);
+        }
       }
+      // Yield to event loop between events to keep the server responsive
+      await new Promise((resolve) => setImmediate(resolve));
     }
-    // Yield to event loop between events
-    await new Promise((resolve) => setImmediate(resolve));
+  } finally {
+    isProcessingHookQueue = false;
   }
-
-  isProcessingHookQueue = false;
 }
 
 function registerHookRoute(app: FastifyInstance, options: HttpServerOptions): void {
@@ -182,6 +190,11 @@ function registerHookRoute(app: FastifyInstance, options: HttpServerOptions): vo
       const { providerId } = request.params;
       const event = request.body as Record<string, unknown>;
 
+      if (!event || typeof event !== 'object') {
+        reply.code(400).send('Invalid body');
+        return;
+      }
+
       if (process.env['PIXEL_AGENTS_DEBUG_LOG']) {
         try {
           const fs = require('fs') as typeof import('fs');
@@ -203,7 +216,7 @@ function registerHookRoute(app: FastifyInstance, options: HttpServerOptions): vo
         if (hookQueue.length >= MAX_HOOK_QUEUE_SIZE) {
           hookQueue.shift(); // Evict oldest on overflow
         }
-        hookQueue.push({ providerId, event });
+        hookQueue.push({ providerId, event, enqueuedAt: Date.now() });
         processHookQueue(options.onHookEvent).catch(() => {});
       } else {
         if (process.env['PIXEL_AGENTS_DEBUG_LOG']) {
