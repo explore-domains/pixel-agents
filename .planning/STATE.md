@@ -32,3 +32,4 @@ progress:
 - **D-02:** Applied a deterministic 30° hue shift per palette collision to ensure visual distinction.
 - **D-12:** Defaulted providerId to 'claude' for existing/legacy data during persistence and restore.
 - **D-13/D-14:** Updated adoptExternalSessionFromHook to require providerId to ensure all adoption paths are provider-aware.
+- **D-18:** Prefer instance-configured HookProvider over global registry when IDs match in HookEventHandler.
