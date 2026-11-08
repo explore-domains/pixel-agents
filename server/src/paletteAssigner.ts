@@ -45,5 +45,20 @@ export function assignPaletteIfNeeded(agent: AgentState, store: AgentStateStore)
 
   const pick = pickDiversePalette(count, paletteCounts);
   agent.palette = pick.palette;
-  agent.hueShift = pick.hueShift;
+
+  // Per D-02: collision detection + hue shift for duplicate palettes.
+  // When multiple agents share a palette index, rotate hueShift by 30°
+  // per collision to visually differentiate them.
+  let collisions = 0;
+  for (const existing of store.values()) {
+    if (existing.id !== agent.id && existing.palette === agent.palette) {
+      collisions++;
+    }
+  }
+
+  if (collisions > 0) {
+    agent.hueShift = (collisions * 30) % 360;
+  } else {
+    agent.hueShift = pick.hueShift;
+  }
 }

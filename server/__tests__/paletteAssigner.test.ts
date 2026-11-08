@@ -72,9 +72,8 @@ describe('paletteAssigner', () => {
       const agent = createTestAgent({ id: 1 });
       assignPaletteIfNeeded(agent, store);
       expect([2, 3, 4, 5]).toContain(agent.palette);
-      // minCount > 0 → hue shift in [45, 315].
-      expect(agent.hueShift).toBeGreaterThanOrEqual(45);
-      expect(agent.hueShift).toBeLessThanOrEqual(HUE_SHIFT_MAX_DEG);
+      // Per D-02: minCount = 1 -> collisions = 1 -> hueShift = 30.
+      expect(agent.hueShift).toBe(30);
     });
 
     it('counts only agents with a defined in-range palette', () => {
@@ -104,6 +103,23 @@ describe('paletteAssigner', () => {
         expect(a.palette).toBe(prev?.palette);
         expect(a.hueShift).toBe(prev?.hueShift);
       }
+    });
+
+    it('applies hue shift of 30 deg per collision on duplicate palettes (per D-02)', () => {
+      // 1 agent on palette 0
+      store.set(100, createTestAgent({ id: 100, palette: 0, hueShift: 0 }));
+
+      // Fill 1..5 with 2 agents each, so 0 (count=1) is the least used.
+      for (let i = 1; i < PALETTE_COUNT; i++) {
+        store.set(200 + i, createTestAgent({ id: 200 + i, palette: i, hueShift: 0 }));
+        store.set(300 + i, createTestAgent({ id: 300 + i, palette: i, hueShift: 0 }));
+      }
+
+      const agent = createTestAgent({ id: 1 });
+      assignPaletteIfNeeded(agent, store);
+
+      expect(agent.palette).toBe(0);
+      expect(agent.hueShift).toBe(30); // 1 collision -> 30deg
     });
   });
 
