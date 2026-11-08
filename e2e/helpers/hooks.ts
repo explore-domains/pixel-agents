@@ -288,3 +288,77 @@ export function sessionEndResume(sessionId: string): HookEventPayload {
     reason: 'resume',
   };
 }
+
+// ── Antigravity ───────────────────────────────────────────────
+
+export function antigravitySessionStart(conversationId: string, workspacePaths: string[]): any {
+  return {
+    hookEventName: 'PreInvocation',
+    conversationId,
+    workspacePaths,
+  };
+}
+
+export function antigravityPreToolUse(conversationId: string, toolName: string, args: any): any {
+  return {
+    hookEventName: 'PreToolUse',
+    conversationId,
+    toolCall: {
+      name: toolName,
+      args,
+    },
+  };
+}
+
+// ── Gemini CLI ────────────────────────────────────────────────
+
+export function geminiPreToolUse(environmentId: string, toolName: string, args: any): any {
+  return {
+    event_type: 'pre_tool_execution',
+    environment_id: environmentId,
+    tool_call: {
+      name: toolName,
+      args,
+    },
+  };
+}
+
+// ── OpenCode ──────────────────────────────────────────────────
+
+export function opencodeSessionStart(sessionId: string): any {
+  return {
+    eventType: 'session.start',
+    sessionId,
+    payload: {},
+  };
+}
+
+export function opencodePreToolUse(sessionId: string, toolName: string, input: any): any {
+  return {
+    eventType: 'tool.pre',
+    sessionId,
+    payload: {
+      toolName,
+      input,
+    },
+  };
+}
+
+// ── Copilot ───────────────────────────────────────────────────
+
+export function copilotSessionStart(sessionId: string, cwd: string): any {
+  return {
+    hook_event_name: 'SessionStart',
+    session_id: sessionId,
+    cwd,
+  };
+}
+
+export function copilotPreToolUse(sessionId: string, toolName: string, input: any): any {
+  return {
+    hook_event_name: 'PreToolUse',
+    session_id: sessionId,
+    tool_name: toolName,
+    tool_input: input,
+  };
+}
