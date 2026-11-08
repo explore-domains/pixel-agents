@@ -389,7 +389,7 @@ async function main(): Promise<void> {
       // Without this line, a persisted hooks-off makes startup skip the entire
       // consent/install flow with zero output — indistinguishable from a bug.
       console.log(
-        '[Pixel Agents] Hooks disabled — enable "Instant Detection (Hooks)" in the UI settings to install them.',
+        '[ED Pixel Agents] Hooks disabled — enable "ED Instant Detection (Hooks)" in the UI settings to install them.',
       );
     }
 

@@ -262,7 +262,7 @@ describe('clientMessageHandler: hooks consent flow', () => {
     // The provider id is echoed from the request, so an id naming no
     // registered provider is a crafted message — dropped exactly like junk.
     // A MISSING id too: the pre-providerId wire shape must not act on anything.
-    it.each([['copilot'], [''], [42], [null], [{}], ['missing']])(
+    it.each([['unknown-provider'], [''], [42], [null], [{}], ['missing']])(
       'unknown providerId %j writes nothing, even with a real choice',
       async (junkId) => {
         let sideEffectRan = false;

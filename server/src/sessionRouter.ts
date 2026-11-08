@@ -11,6 +11,7 @@ export interface PendingExternalSession {
 /** An event waiting to be dispatched once its agent registers. */
 export interface BufferedEvent {
   providerId: string;
+  sessionId: string;
   event: Record<string, unknown>;
   timestamp: number;
 }
@@ -83,8 +84,8 @@ export class SessionRouter {
 
   // ── Event buffering ────────────────────────────────────────────────
 
-  bufferEvent(providerId: string, event: Record<string, unknown>): void {
-    this.buffer.push({ providerId, event, timestamp: Date.now() });
+  bufferEvent(providerId: string, sessionId: string, event: Record<string, unknown>): void {
+    this.buffer.push({ providerId, sessionId, event, timestamp: Date.now() });
     if (!this.bufferTimer) {
       this.bufferTimer = setInterval(() => {
         this.pruneExpired();
@@ -93,7 +94,7 @@ export class SessionRouter {
   }
 
   hasBuffered(providerId: string, sessionId: string): boolean {
-    return this.buffer.some((b) => b.providerId === providerId && b.event.session_id === sessionId);
+    return this.buffer.some((b) => b.providerId === providerId && b.sessionId === sessionId);
   }
 
   pruneExpired(): void {
@@ -117,11 +118,9 @@ export class SessionRouter {
   // ── Private ────────────────────────────────────────────────────────
 
   private flushBuffered(providerId: string, sessionId: string): BufferedEvent[] {
-    const toFlush = this.buffer.filter(
-      (b) => b.providerId === providerId && b.event.session_id === sessionId,
-    );
+    const toFlush = this.buffer.filter((b) => b.providerId === providerId && b.sessionId === sessionId);
     this.buffer = this.buffer.filter(
-      (b) => !(b.providerId === providerId && b.event.session_id === sessionId),
+      (b) => !(b.providerId === providerId && b.sessionId === sessionId),
     );
     this.cleanupBufferTimer();
     return toFlush;

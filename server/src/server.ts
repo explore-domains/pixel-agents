@@ -51,11 +51,11 @@ export class PixelAgentsServer {
   private app: FastifyInstance | null = null;
   private config: ServerConfig | null = null;
   private ownsServer = false;
-  private callback: HookEventCallback | null = null;
+  private callbacks: HookEventCallback[] = [];
 
   /** Register a callback for incoming hook events from any provider. */
   onHookEvent(callback: HookEventCallback): void {
-    this.callback = callback;
+    this.callbacks.push(callback);
   }
 
   /**
@@ -116,7 +116,7 @@ export class PixelAgentsServer {
       this.config = candidate;
       this.ownsServer = false;
       console.log(
-        `[Pixel Agents] Reusing existing ${wantsSpa ? 'standalone' : 'embedded'} server on port ${candidate.port} (PID ${candidate.pid})`,
+        `[ED Pixel Agents] Reusing existing ${wantsSpa ? 'standalone' : 'embedded'} server on port ${candidate.port} (PID ${candidate.pid})`,
       );
       return candidate;
     }
@@ -139,7 +139,11 @@ export class PixelAgentsServer {
       runtime: options?.runtime,
       staticDir: options?.staticDir,
       assetCache: options?.assetCache,
-      onHookEvent: (providerId, event) => this.callback?.(providerId, event),
+      onHookEvent: (providerId, event) => {
+        for (const callback of this.callbacks) {
+          callback(providerId, event);
+        }
+      },
       onSetHooksEnabled: options?.onSetHooksEnabled,
       onReloadAssets: options?.onReloadAssets,
       ptyManager: options?.ptyManager,
@@ -166,7 +170,7 @@ export class PixelAgentsServer {
     // entry (new hook scripts fan out to every entry here).
     this.writeServerJson(this.config);
     this.writeRegistryEntry(this.config);
-    console.log(`[Pixel Agents] Server: listening on 127.0.0.1:${port}`);
+    console.log(`[ED Pixel Agents] Server: listening on 127.0.0.1:${port}`);
 
     return this.config;
   }
@@ -207,7 +211,7 @@ export class PixelAgentsServer {
       fs.writeFileSync(tmpPath, JSON.stringify(config, null, 2), { mode: 0o600 });
       fs.renameSync(tmpPath, filePath);
     } catch (e) {
-      console.error(`[Pixel Agents] Failed to write server.json: ${e}`);
+      console.error(`[ED Pixel Agents] Failed to write server.json: ${e}`);
     }
   }
 
@@ -302,7 +306,7 @@ export class PixelAgentsServer {
       fs.writeFileSync(tmpPath, JSON.stringify(config, null, 2), { mode: 0o600 });
       fs.renameSync(tmpPath, filePath);
     } catch (e) {
-      console.error(`[Pixel Agents] Failed to write registry entry: ${e}`);
+      console.error(`[ED Pixel Agents] Failed to write registry entry: ${e}`);
     }
   }
 

@@ -15,6 +15,7 @@ export function normalizeHookEvent(
         sessionId,
         event: {
           kind: 'sessionStart',
+          cwd: typeof payload?.cwd === 'string' ? payload.cwd : undefined,
         },
       };
 

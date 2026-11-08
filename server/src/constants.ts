@@ -61,7 +61,7 @@ export const DIRECTORY_SUGGESTION_FILES_PER_SESSION_DIR = 5;
  *  by when a session last ran there. */
 export const DIRECTORY_SUGGESTION_LIMIT = 10;
 
-// ── Display Truncation + Pixel Agents Server paths ──────────
+// ── Display Truncation + ED Pixel Agents Server paths ──────────
 // Centralized in core/src/constants.ts; re-exported here for back-compat.
 export {
   BASH_COMMAND_DISPLAY_MAX_LENGTH,

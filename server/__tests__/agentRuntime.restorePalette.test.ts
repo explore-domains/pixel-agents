@@ -91,6 +91,7 @@ describe('AgentRuntime -- restore preserves palette/hueShift', () => {
       {
         id: 7,
         sessionId: 'sess-restore',
+        providerId: 'claude',
         terminalName: '',
         isExternal: true,
         jsonlFile: jsonlPath,
@@ -161,6 +162,7 @@ describe('AgentRuntime -- restore preserves palette/hueShift', () => {
       {
         id: 9,
         sessionId: 'sess-fresh',
+        providerId: 'claude',
         terminalName: '',
         isExternal: true,
         jsonlFile: jsonlPath,

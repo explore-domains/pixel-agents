@@ -1,6 +1,6 @@
 {
-  "name": "pixel-agents",
-  "displayName": "Pixel Agents",
+  "name": "ed-pixel-agents",
+  "displayName": "ED Pixel Agents",
   "description": "Pixel art office where your Claude Code agents come to life as animated characters",
   "version": "1.5.0",
   "publisher": "pablodelucca",
@@ -29,7 +29,8 @@
   ],
   "main": "./dist/extension.js",
   "bin": {
-    "pixel-agents": "./dist/cli.js"
+    "pixel-agents": "./dist/cli.js",
+    "ed-pixel-agents": "./dist/cli.js"
   },
   "files": [
     "CHANGELOG.md",
@@ -46,18 +47,18 @@
     "commands": [
       {
         "command": "pixel-agents.showPanel",
-        "title": "Pixel Agents: Show Panel"
+        "title": "ED Pixel Agents: Show Panel"
       },
       {
         "command": "pixel-agents.exportDefaultLayout",
-        "title": "Pixel Agents: Export Layout as Default"
+        "title": "ED Pixel Agents: Export Layout as Default"
       }
     ],
     "viewsContainers": {
       "panel": [
         {
           "id": "pixel-agents-panel",
-          "title": "Pixel Agents",
+          "title": "ED Pixel Agents",
           "icon": "$(window)"
         }
       ]
@@ -67,17 +68,17 @@
         {
           "type": "webview",
           "id": "pixel-agents.panelView",
-          "name": "Pixel Agents"
+          "name": "ED Pixel Agents"
         }
       ]
     },
     "configuration": {
-      "title": "Pixel Agents",
+      "title": "ED Pixel Agents",
       "properties": {
         "pixel-agents.autoShowPanel": {
           "type": "boolean",
           "default": false,
-          "description": "Automatically open and focus the Pixel Agents panel when VS Code starts."
+          "description": "Automatically open and focus the ED Pixel Agents panel when VS Code starts."
         },
         "pixel-agents.autoSpawnAgent": {
           "type": "boolean",

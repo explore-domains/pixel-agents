@@ -48,7 +48,7 @@ test.describe('Multi-provider integration', () => {
           startEvent = antigravitySessionStart(sessionId, [workspaceDir]);
           break;
         case 'opencode':
-          startEvent = opencodeSessionStart(sessionId);
+          startEvent = opencodeSessionStart(sessionId, workspaceDir);
           break;
         case 'copilot':
           startEvent = copilotSessionStart(sessionId, workspaceDir);
@@ -62,6 +62,7 @@ test.describe('Multi-provider integration', () => {
       }
 
       if (startEvent) {
+        console.log(`Sending startEvent for ${provider.id}:`, JSON.stringify(startEvent));
         await sendHookEvent(serverConfig, startEvent, provider.id);
       }
 
@@ -87,7 +88,7 @@ test.describe('Multi-provider integration', () => {
           toolEvent = preToolUseBash(sessionId, 'ls');
           break;
       }
-
+      console.log(`Sending toolEvent for ${provider.id}:`, JSON.stringify(toolEvent));
       await sendHookEvent(serverConfig, toolEvent, provider.id);
 
       narrator.check(`${provider.name} agent appeared and is active`);

@@ -107,10 +107,12 @@ export async function sendHookEvent(
 
   if (!response.ok) {
     const body = await response.text().catch(() => '');
+    console.error(`Hook event ${event.hook_event_name || event.hookEventName || event.eventType} to ${provider} failed with ${response.status}: ${body || '<empty>'}`);
     throw new Error(
-      `Hook event ${event.hook_event_name} failed with ${response.status}: ${body || '<empty>'}`,
+      `Hook event ${event.hook_event_name || event.hookEventName || event.eventType} failed with ${response.status}: ${body || '<empty>'}`,
     );
   }
+
 }
 
 export function sessionStartStartup(
@@ -325,11 +327,11 @@ export function geminiPreToolUse(environmentId: string, toolName: string, args: 
 
 // ── OpenCode ──────────────────────────────────────────────────
 
-export function opencodeSessionStart(sessionId: string): any {
+export function opencodeSessionStart(sessionId: string, cwd: string): any {
   return {
     eventType: 'session.start',
     sessionId,
-    payload: {},
+    payload: { cwd },
   };
 }
 

@@ -60,6 +60,7 @@ describe('AgentRuntime -- restore reads the legacy folderName', () => {
       {
         id: 7,
         sessionId: 'sess-restore',
+        providerId: 'claude',
         terminalName: '',
         isExternal: true,
         jsonlFile: jsonlPath,

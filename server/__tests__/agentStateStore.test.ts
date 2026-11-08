@@ -194,8 +194,8 @@ describe('AgentStateStore', () => {
     it('loadPersistedAgents returns data from adapter', () => {
       const adapter = createMockAdapter();
       const persisted: PersistedAgent[] = [
-        { id: 1, terminalName: 'term-1', jsonlFile: '/a.jsonl', projectDir: '/proj' },
-        { id: 2, terminalName: 'term-2', jsonlFile: '/b.jsonl', projectDir: '/proj' },
+        { id: 1, providerId: 'claude', terminalName: 'term-1', jsonlFile: '/a.jsonl', projectDir: '/proj' },
+        { id: 2, providerId: 'claude', terminalName: 'term-2', jsonlFile: '/b.jsonl', projectDir: '/proj' },
       ];
       (adapter.loadAgents as ReturnType<typeof vi.fn>).mockReturnValue(persisted);
       store.setAdapter(adapter);

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { AgentStateStore } from '../src/agentStateStore.js';
-import { HUE_SHIFT_MAX_DEG, PALETTE_COUNT } from '../src/constants.js';
+import { PALETTE_COUNT } from '../src/constants.js';
 import { assignPaletteIfNeeded, setPaletteCount } from '../src/paletteAssigner.js';
 import type { AgentState } from '../src/types.js';
 

@@ -180,15 +180,43 @@ function registerHookRoute(app: FastifyInstance, options: HttpServerOptions): vo
     },
     async (request, reply) => {
       const { providerId } = request.params;
-      const event = request.body;
+      const event = request.body as Record<string, unknown>;
 
-      // Validate basic shape before enqueueing
-      if (typeof event.session_id === 'string') {
+      if (process.env['PIXEL_AGENTS_DEBUG_LOG']) {
+        try {
+          const fs = require('fs') as typeof import('fs');
+          fs.appendFileSync(
+            process.env['PIXEL_AGENTS_DEBUG_LOG']!,
+            `${new Date().toISOString()} HTTP POST /api/hooks/${providerId} keys=${Object.keys(event).join(',')}\n`,
+          );
+        } catch {
+          /* ignore */
+        }
+      }
+
+      // Validate basic shape before enqueueing: must carry a session identifier
+      // (field names vary by provider; normalizeHookEvent handles extraction).
+      const sessionId =
+        event.session_id ?? event.sessionId ?? event.conversationId ?? event.environment_id;
+
+      if (typeof sessionId === 'string') {
         if (hookQueue.length >= MAX_HOOK_QUEUE_SIZE) {
           hookQueue.shift(); // Evict oldest on overflow
         }
         hookQueue.push({ providerId, event });
         processHookQueue(options.onHookEvent).catch(() => {});
+      } else {
+        if (process.env['PIXEL_AGENTS_DEBUG_LOG']) {
+          try {
+            const fs = require('fs') as typeof import('fs');
+            fs.appendFileSync(
+              process.env['PIXEL_AGENTS_DEBUG_LOG']!,
+              `${new Date().toISOString()} HTTP REJECTED /api/hooks/${providerId} - missing sessionId. Keys: ${Object.keys(event).join(',')}\n`,
+            );
+          } catch {
+            /* ignore */
+          }
+        }
       }
 
       reply.code(202).send('Accepted');

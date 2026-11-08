@@ -195,7 +195,7 @@ export function SettingsModal({
         onChange={onToggleWatchAllSessions}
       />
       <Checkbox
-        label="Instant Detection (Hooks)"
+        label="ED Instant Detection (Hooks)"
         checked={hooksInstalled}
         onChange={onToggleHooksEnabled}
       />

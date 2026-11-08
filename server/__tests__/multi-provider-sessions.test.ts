@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
+
+import { HookProvider } from '../../core/src/provider.js';
 import { AgentRuntime } from '../src/agentRuntime.js';
 import { AgentStateStore } from '../src/agentStateStore.js';
 import { claudeProvider } from '../src/providers/hook/claude/claude.js';
-import { HookProvider } from '../../core/src/provider.js';
 
 /**
  * Task 4: Integration test for multi-provider session coexistence.
@@ -11,7 +12,9 @@ import { HookProvider } from '../../core/src/provider.js';
  */
 
 const antigravityProvider: HookProvider = {
+  kind: 'hook',
   id: 'antigravity',
+  displayName: 'Antigravity',
   protocolVersion: 1,
   subagentToolNames: new Set(['Agent']),
   normalizeHookEvent: (raw) => {
@@ -32,6 +35,12 @@ const antigravityProvider: HookProvider = {
     return null;
   },
   formatToolStatus: () => 'Running',
+  installHooks: async () => {},
+  uninstallHooks: async () => {},
+  areHooksInstalled: async () => true,
+  consentDisclosure: () => ({ headline: 'Antigravity', disclosure: 'disclosure' }),
+  permissionExemptTools: new Set(),
+  readingTools: new Set(),
 };
 
 describe('Multi-provider session coexistence', () => {

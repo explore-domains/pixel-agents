@@ -282,7 +282,7 @@ describe('HookEventHandler', () => {
     // Now register -- event should have been pruned
     const agent2 = createTestAgent({ id: 2 });
     agents.set(2, agent2);
-    handler.registerAgent('expired-sess', 2);
+    handler.registerAgent('claude', 'expired-sess', 2);
 
     // No messages (event was pruned)
     expect(mockWebview.messages).toHaveLength(0);
@@ -352,7 +352,7 @@ describe('HookEventHandler', () => {
       pendingClear: true,
     } as Partial<AgentState>);
     agents.set(1, agent);
-    handler.registerAgent('old-sess', 1);
+    handler.registerAgent('claude', 'old-sess', 1);
 
     const onSessionClear = vi.fn();
     handler.setLifecycleCallbacks({ onSessionClear });
@@ -607,7 +607,7 @@ describe('HookEventHandler', () => {
       projectDir: '/projects/test',
     });
     agents.set(1, agent);
-    handler.registerAgent('old-sess', 1);
+    handler.registerAgent('claude', 'old-sess', 1);
 
     const onSessionClear = vi.fn();
     const onSessionEnd = vi.fn();
@@ -654,7 +654,7 @@ describe('HookEventHandler', () => {
       pendingClear: true,
     });
     agents.set(1, resumingAgent);
-    handler.registerAgent('old-sess-1', 1);
+    handler.registerAgent('claude', 'old-sess-1', 1);
 
     // Agent 2: external agent in same projectDir (no pendingClear)
     const externalAgent = createTestAgent({
@@ -664,7 +664,7 @@ describe('HookEventHandler', () => {
       pendingClear: false,
     });
     agents.set(2, externalAgent);
-    handler.registerAgent('ext-sess-2', 2);
+    handler.registerAgent('claude', 'ext-sess-2', 2);
 
     // SessionStart(source=resume) should reassign Agent 1 (pendingClear), NOT Agent 2
     handler.handleEvent('claude', {
@@ -739,7 +739,7 @@ describe('HookEventHandler', () => {
       pendingClear: true,
     });
     agents.set(1, agent);
-    handler.registerAgent('old-sess', 1);
+    handler.registerAgent('claude', 'old-sess', 1);
 
     handler.handleEvent('claude', {
       hook_event_name: 'SessionStart',

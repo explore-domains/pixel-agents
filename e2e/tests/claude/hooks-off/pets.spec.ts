@@ -50,7 +50,7 @@ const PETS_CAROUSEL = '[data-testid="pets-carousel"]';
  * Mirrors the layout-editor smoke test in hooks-on/lifecycle.spec.ts.
  */
 async function dismissFirstRunTooltips(frame: Frame): Promise<void> {
-  for (const tooltipText of ['Instant Detection Active', 'Updated to v']) {
+  for (const tooltipText of ['ED Instant Detection Active', 'Updated to v']) {
     const tooltip = frame.locator('div', { hasText: tooltipText }).first();
     if (await tooltip.isVisible().catch(() => false)) {
       const closeBtn = tooltip.locator('button', { hasText: 'x' }).first();
