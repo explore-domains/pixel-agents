@@ -25,6 +25,12 @@
 - [x] **UI-01**: Update Pixel Office canvas to support 5 concurrent agent avatars.
 - [x] **UI-02**: Rebrand UI and extension metadata to "ED Pixel Agents".
 
+### Safety and Operations
+
+- [x] **UX-01**: Bounded async hook queue prevents runaway backlog or UI instability.
+- [x] **OPS-01**: Latency instrumentation proves negligible overhead for CLI execution.
+- [x] **OPS-02**: Guarded routing and validation prevent crashes from malformed or stale payloads.
+
 ## v2 Requirements (Deferred)
 
 - [ ] **UI-03**: Add "agent status" dashboard in webview.

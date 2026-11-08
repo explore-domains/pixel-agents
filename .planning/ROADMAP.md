@@ -49,6 +49,11 @@
 
 **Goal:** Optimize event delivery latency and harden the extension against concurrency/crash issues.
 **Mode:** standard
+**Plans:** 1/1 plans complete
+**Plan list:**
+
+- [x] 04-01-PLAN.md — harden the async hook queue, add latency smoke checks, and validate the final office under load.
+
 **Success Criteria**:
 
 1. Bounded async event queue implemented.
