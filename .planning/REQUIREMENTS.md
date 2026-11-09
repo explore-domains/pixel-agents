@@ -1,43 +1,27 @@
 # Requirements
 
-## User Stories
+## Milestone v1.1: Local Build and VSIX Packaging
 
-- As a developer, I want to see multiple AI coding agents active simultaneously in my pixel art office, so I can track all my agent work.
-- As a developer, I want to support Antigravity, Gemini CLI, OpenCode, and Copilot in addition to Claude Code, so I am not locked into one agent provider.
-- As a developer, I want to ensure that agent sessions are accurately tracked and do not collide, so I can trust the office visualization.
+### BUILD: Local Build Pipeline
+- [ ] **BUILD-01**: User can build the extension and webview via a single `npm` script.
+- [ ] **BUILD-02**: Build process is local-only (no external CI/GitHub dependency).
 
-## v1 Requirements
+### PACK: VSIX Packaging
+- [ ] **PACK-01**: User can generate a `.vsix` file using `vsce`.
+- [ ] **PACK-02**: `.vsix` file contains all necessary assets (webview bundles, extension code).
 
-### Core Infrastructure
+### DOCS: Documentation
+- [ ] **DOCS-01**: README contains steps for local installation from VSIX.
 
-- [x] **CORE-01**: Implement canonical `AgentEvent` normalization boundary in `HookEventHandler`.
-- [x] **CORE-02**: Implement multi-provider session registry with namespacing (provider + workspace + sessionID).
-
-### Agent Adapters
-
-- [x] **ADAP-01**: Implement Antigravity hook adapter (shell-bridge).
-- [x] **ADAP-02**: Implement Gemini CLI hook adapter (shell-bridge).
-- [x] **ADAP-03**: Implement OpenCode hook adapter (plugin/SDK).
-- [x] **ADAP-04**: Implement Copilot hook adapter (native HTTP).
-
-### UI/Visualization
-
-- [x] **UI-01**: Update Pixel Office canvas to support 5 concurrent agent avatars.
-- [x] **UI-02**: Rebrand UI and extension metadata to "ED Pixel Agents".
-
-### Safety and Operations
-
-- [x] **UX-01**: Bounded async hook queue prevents runaway backlog or UI instability.
-- [x] **OPS-01**: Latency instrumentation proves negligible overhead for CLI execution.
-- [x] **OPS-02**: Guarded routing and validation prevent crashes from malformed or stale payloads.
-
-## v2 Requirements (Deferred)
-
+## Future Requirements
 - [ ] **UI-03**: Add "agent status" dashboard in webview.
 - [ ] **UI-04**: Implement customizable character sprites.
 
 ## Out of Scope
-
+- Automated build via GitHub Actions (explicitly requested to be local-only).
 - Rewriting canvas rendering engine or sprite asset pipeline.
 - Dropping Claude Code support.
 - Unsanctioned monkey-patching of closed CLIs.
+
+## Traceability
+(To be filled by roadmap)
