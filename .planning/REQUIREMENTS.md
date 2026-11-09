@@ -24,4 +24,11 @@
 - Unsanctioned monkey-patching of closed CLIs.
 
 ## Traceability
-(To be filled by roadmap)
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| BUILD-01 | Phase 5 | Pending |
+| BUILD-02 | Phase 5 | Pending |
+| PACK-01 | Phase 6 | Pending |
+| PACK-02 | Phase 6 | Pending |
+| DOCS-01 | Phase 6 | Pending |
