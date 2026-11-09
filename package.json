@@ -94,8 +94,10 @@
     "prepack": "npm run package",
     "build:extension": "node esbuild.js --production",
     "build:webview": "cd webview-ui && npm run build",
-    "compile": "npm run asyncapi:generate && npm run check-types && npm run lint && node esbuild.js && npm run build:webview",
-    "build": "npm run compile",
+    "check": "npm run asyncapi:generate && npm run check-types && npm run lint",
+    "build": "npm run asyncapi:generate && npm-run-all -p build:extension build:webview",
+    "package:local": "npm run check && npm run build && npx @vscode/vsce package --out dist/local/",
+
     "watch": "npm-run-all -p watch:*",
     "watch:esbuild": "node esbuild.js --watch",
     "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
