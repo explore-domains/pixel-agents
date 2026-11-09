@@ -8,7 +8,16 @@ A VS Code extension and standalone tool that brings AI coding agents to life as 
 
 Provide delightful, accurate, real-time pixel art visualization and workspace status for developers using modern AI coding agents (Antigravity, Claude Code, Gemini CLI, OpenCode, and Copilot).
 
-## Current State
+## Current Milestone: v1.1 Local Build and VSIX Packaging
+
+**Goal:** Enable local building and packaging of the ED Pixel Agents VS Code extension for installation (local-only, no GitHub dependency).
+
+**Target features:**
+- Automated local build pipeline for extension and webview
+- VSIX packaging script (using `vsce`)
+- Local development/installation guide in README
+
+## Release History
 
 **Milestone v1.0 Shipped ✅ (2026-11-08)**
 - Multi-provider ingestion server with canonical `AgentEvent` model.
