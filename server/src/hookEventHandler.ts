@@ -12,9 +12,6 @@ import type { AgentState } from './types.js';
 
 const debug = process.env.PIXEL_AGENTS_DEBUG !== '0';
 
-const hookProcessingTimings: number[] = [];
-const MAX_TIMINGS = 100;
-
 /**
  * Dispatches normalized AgentEvents to agents based on session_id.
  * Session routing (session→agent mapping, pending sessions, event buffering)
@@ -121,11 +118,11 @@ export class HookEventHandler {
   }
 
   handleEvent(providerId: string, rawEvent: Record<string, unknown>): void {
-    const provider =
-      providerId === this.provider.id ? this.provider : hookProviderById(providerId);
+    const provider = providerId === this.provider.id ? this.provider : hookProviderById(providerId);
 
     if (!provider) {
-      if (debug) console.warn(`[Pixel Agents] Hook: Unknown provider "${providerId}", dropping event`);
+      if (debug)
+        console.warn(`[Pixel Agents] Hook: Unknown provider "${providerId}", dropping event`);
       return;
     }
 
@@ -168,7 +165,8 @@ export class HookEventHandler {
       }
     }
 
-    if (debug) console.log(`[Pixel Agents] Hook: normalized event for ${providerId} kind=${normEvent.kind}`);
+    if (debug)
+      console.log(`[Pixel Agents] Hook: normalized event for ${providerId} kind=${normEvent.kind}`);
 
     // --- SessionStart: handle /clear for known agents, ignore unknown sessions ---
     if (normEvent.kind === 'sessionStart') {
@@ -270,7 +268,9 @@ export class HookEventHandler {
     if (
       !pending &&
       this.sessionRouter.resolve(providerId, sessionId) === undefined &&
-      (normEvent.kind === 'toolStart' || normEvent.kind === 'turnEnd' || normEvent.kind === 'permissionRequest') &&
+      (normEvent.kind === 'toolStart' ||
+        normEvent.kind === 'turnEnd' ||
+        normEvent.kind === 'permissionRequest') &&
       this.watchAllSessionsRef?.current
     ) {
       if (debug)
@@ -379,7 +379,9 @@ export class HookEventHandler {
     // Guard: already handling a clear/resume for this agent?
     if (agent.pendingClear && (reason === 'clear' || reason === 'resume')) {
       if (debug)
-        console.log(`[Pixel Agents] Hook: Agent ${agentId} - skipping duplicate SessionEnd(${reason})`);
+        console.log(
+          `[Pixel Agents] Hook: Agent ${agentId} - skipping duplicate SessionEnd(${reason})`,
+        );
       return;
     }
 

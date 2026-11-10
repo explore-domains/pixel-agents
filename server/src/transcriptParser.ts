@@ -444,6 +444,8 @@ export function processTranscriptLine(
           }
         }
       }
+    } else if (record.type === 'gemini' || record.type === 'info' || record.type === 'warning') {
+      // Ignore known Gemini records that don't need special parsing for agent state yet.
     } else if (record.type === 'system' && record.subtype === 'turn_duration') {
       cancelWaitingTimer(agentId, waitingTimers);
       cancelPermissionTimer(agentId, permissionTimers);

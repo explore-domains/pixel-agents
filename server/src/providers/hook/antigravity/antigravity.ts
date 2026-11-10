@@ -1,4 +1,29 @@
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+
 import type { AgentEvent, HookProvider } from '../../../../../core/src/provider.js';
+
+function getSessionDirs(workspacePath: string): string[] {
+  const historyPath = path.join(os.homedir(), '.gemini', 'antigravity-cli', 'history.jsonl');
+  if (!fs.existsSync(historyPath)) return [];
+
+  const lines = fs.readFileSync(historyPath, 'utf-8').split('\n');
+  const sessionDirs = new Set<string>();
+
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    try {
+      const record = JSON.parse(line);
+      if (record.workspace === workspacePath && record.conversationId) {
+        sessionDirs.add(
+          path.join(os.homedir(), '.gemini', 'antigravity-cli', 'brain', record.conversationId),
+        );
+      }
+    } catch {}
+  }
+  return Array.from(sessionDirs);
+}
 
 export function normalizeHookEvent(
   raw: Record<string, unknown>,
@@ -56,12 +81,10 @@ export const antigravityProvider: HookProvider = {
   displayName: 'Antigravity CLI',
   protocolVersion: 1,
   normalizeHookEvent,
-  installHooks: async () => {
-    // In a real implementation, this would write to ~/.gemini/antigravity-cli/hooks.json
-    // For now, we stub the installer as it requires FS access outside the project.
-  },
+  getSessionDirs,
+  installHooks: async () => {},
   uninstallHooks: async () => {},
-  areHooksInstalled: async () => true, // Assume true for development
+  areHooksInstalled: async () => true,
   consentDisclosure: () => ({
     headline: 'Install Antigravity Hooks',
     disclosure:

@@ -804,28 +804,35 @@ export class PixelAgentsViewProvider implements vscode.WebviewViewProvider {
 
         // Ensure project scan runs even with no restored agents (to adopt external terminals)
         const wsFolders = vscode.workspace.workspaceFolders;
-        const projectDir = getProjectDirPath();
-        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-        console.log(`[ED Pixel Agents] Debug: Platform: ${process.platform}, arch: ${process.arch}`);
-        console.log('[Extension] workspaceRoot:', workspaceRoot);
-        console.log('[Extension] projectDir:', projectDir);
-        this.runtime.startProjectScan(projectDir);
-
-        // Start external session scanning (detects VS Code extension panel sessions)
-        this.runtime.startExternalScanning(projectDir);
-
-        // In multi-root workspaces, also scan project dirs for all other folders
-        // so agents running in any workspace folder are discovered
-        if (wsFolders && wsFolders.length > 1) {
+        const workspaceDirs = new Set<string>();
+        if (wsFolders) {
           for (const folder of wsFolders) {
-            const folderProjectDir = getProjectDirPath(folder.uri.fsPath);
-            if (folderProjectDir && folderProjectDir !== projectDir) {
-              console.log(`[ED Pixel Agents] Registering additional project dir: ${folderProjectDir}`);
-              this.runtime.startProjectScan(folderProjectDir);
+            workspaceDirs.add(folder.uri.fsPath);
+          }
+        }
+        for (const d of config.directories) {
+          workspaceDirs.add(d.path);
+        }
+
+        console.log(
+          `[ED Pixel Agents] Debug: Platform: ${process.platform}, arch: ${process.arch}`,
+        );
+        for (const wsDir of workspaceDirs) {
+          console.log(`[ED Pixel Agents] Tracking project dir: ${wsDir}`);
+          this.runtime.startProjectScan(wsDir);
+          for (const provider of hookProviders) {
+            const pDirs = provider.getSessionDirs?.(wsDir);
+            if (pDirs) {
+              for (const pDir of pDirs) {
+                console.log(`[ED Pixel Agents] Tracking provider dir: ${pDir}`);
+                this.runtime.startProjectScan(pDir);
+              }
             }
           }
         }
 
+        // Start external session scanning
+        this.runtime.startExternalScanning(process.cwd());
         this.runtime.startStaleCheck();
 
         // Load furniture assets BEFORE sending layout
@@ -841,10 +848,13 @@ export class PixelAgentsViewProvider implements vscode.WebviewViewProvider {
             if (fs.existsSync(bundledAssetsDir)) {
               console.log('[Extension] Found bundled assets at dist/');
               assetsRoot = path.join(extensionPath, 'dist');
-            } else if (workspaceRoot) {
-              // Fall back to workspace root (development or external assets)
-              console.log('[Extension] Trying workspace for assets...');
-              assetsRoot = workspaceRoot;
+            } else {
+              const wsRoot = [...workspaceDirs][0];
+              if (wsRoot) {
+                // Fall back to first workspace folder (development or external assets)
+                console.log('[Extension] Trying workspace for assets...');
+                assetsRoot = wsRoot;
+              }
             }
 
             if (!assetsRoot) {

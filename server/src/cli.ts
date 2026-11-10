@@ -32,7 +32,12 @@ import {
   WILDCARD_HOSTNAMES,
 } from './constants.js';
 import { FileStateAdapter } from './fileStateAdapter.js';
-import { claudeProvider, copyHookScript, hookProviderById } from './providers/index.js';
+import {
+  claudeProvider,
+  copyHookScript,
+  hookProviderById,
+  hookProviders,
+} from './providers/index.js';
 import { PixelAgentsServer } from './server.js';
 import { PtySessionManager } from './terminal/ptySessionManager.js';
 import { isLoopbackHost, normalizeHostname } from './wsAuth.js';
@@ -394,15 +399,28 @@ async function main(): Promise<void> {
     }
 
     // Start scanning for external sessions (Claude running in user's terminal)
-    const cwd = process.cwd();
-    const dirs = claudeProvider.getSessionDirs?.(cwd);
-    if (dirs && dirs[0]) {
-      const projectDir = dirs[0];
-      console.log(`[Pixel Agents] Scanning project dir: ${projectDir}`);
-      runtime.startProjectScan(projectDir);
-      runtime.startExternalScanning(projectDir);
-      runtime.startStaleCheck();
+    const appConfig = readConfig();
+    const workspaceDirs = new Set<string>();
+    workspaceDirs.add(process.cwd());
+    for (const d of appConfig.directories) {
+      workspaceDirs.add(d.path);
     }
+
+    for (const wsDir of workspaceDirs) {
+      console.log(`[Pixel Agents] Tracking project dir: ${wsDir}`);
+      runtime.startProjectScan(wsDir);
+      for (const provider of hookProviders) {
+        const pDirs = provider.getSessionDirs?.(wsDir);
+        if (pDirs) {
+          for (const pDir of pDirs) {
+            console.log(`[Pixel Agents] Tracking provider dir: ${pDir}`);
+            runtime.startProjectScan(pDir);
+          }
+        }
+      }
+    }
+    runtime.startExternalScanning(process.cwd());
+    runtime.startStaleCheck();
 
     // The URL the operator opens has to be REACHABLE (a wildcard bind address
     // is a bind target, not an address you can browse to — `--host 0.0.0.0`
@@ -417,23 +435,8 @@ async function main(): Promise<void> {
       `\n  Pixel Agents server running at http://${displayHost}:${config.port}/?token=${config.token}\n`,
     );
 
-    // ── Graceful shutdown ──
-    let shuttingDown = false;
-    async function shutdown(): Promise<void> {
-      if (shuttingDown) return;
-      shuttingDown = true;
-      console.log('\nShutting down...');
-      // Kill child terminals before the runtime tears their agents down, and
-      // wait for them: exiting now would cancel the SIGKILL escalation and
-      // leave a child that ignores SIGHUP orphaned on a dead server.
-      await ptyManager.disposeAll();
-      runtime.dispose();
-      server.stop();
-      process.exit(0);
-    }
-
-    process.on('SIGINT', () => void shutdown());
-    process.on('SIGTERM', () => void shutdown());
+    // process.on('SIGINT', () => void process.exit(0));
+    // process.on('SIGTERM', () => void process.exit(0));
   } catch (err) {
     console.error('Failed to start server:', err);
     process.exit(1);

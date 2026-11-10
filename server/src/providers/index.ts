@@ -18,7 +18,13 @@ import { copilotProvider } from './hook/copilot/copilot.js';
 import { geminiCliProvider } from './hook/gemini-cli/gemini-cli.js';
 import { opencodeProvider } from './hook/opencode/opencode.js';
 
-export { antigravityProvider, claudeProvider, copilotProvider, geminiCliProvider, opencodeProvider };
+export {
+  antigravityProvider,
+  claudeProvider,
+  copilotProvider,
+  geminiCliProvider,
+  opencodeProvider,
+};
 export { copyHookScript } from './hook/claude/claudeHookInstaller.js';
 
 /** Every bundled hook provider, in registration order. The consent gate loops
@@ -28,8 +34,8 @@ export const hookProviders: readonly HookProvider[] = [
   claudeProvider,
   antigravityProvider,
   copilotProvider,
-  geminiCliProvider,
   opencodeProvider,
+  geminiCliProvider,
 ];
 
 /** Resolve a wire-supplied provider id, or undefined for an unknown one —

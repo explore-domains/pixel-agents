@@ -1280,29 +1280,28 @@ export function scanExternalDir(
   if (hasPendingReassignment) return;
 
   for (const file of files) {
-    // --resume detection: seeded files whose mtime changed have new data.
-    // Adopt directly, bypassing content check (old /clear files have
-    // /clear content but should still be adoptable when resumed).
-    // File stays in knownJsonlFiles (safe from per-agent /clear stealing).
+    // Seeded files (pre-existing at extension startup) are ignored by default
+    // to avoid adopting old /clear files in the workspace. We unseed them if
+    // they show new activity or were recently active at startup, so they can
+    // be adopted (either by a terminal or as an external session).
     const seededMtime = dismissalTracker!.getSeededMtime(file);
     if (seededMtime !== undefined) {
-      // Seeded files are pre-existing at extension startup. If mtime changed,
-      // it could be --resume or internal agent activity. Don't adopt or reassign
-      // here (too ambiguous, causes cascading stealing). Just remove from tracking
-      // so the file can be handled through normal adoption if appropriate.
       try {
         const stat = fs.statSync(file);
-        if (stat.mtimeMs > seededMtime) {
+        const isActive = now - stat.mtimeMs <= EXTERNAL_ACTIVE_THRESHOLD_MS;
+        if (stat.mtimeMs > seededMtime || isActive) {
           dismissalTracker!.clearSeededMtime(file);
           knownJsonlFiles.delete(file);
+          // Proceed to check for adoption in this tick
+        } else {
+          continue;
         }
       } catch {
-        /* ignore */
+        continue;
       }
-      continue;
     }
 
-    // Skip files already known (seeded or adopted).
+    // Skip files already known (e.g. adopted by a terminal or hook).
     if (knownJsonlFiles.has(file)) continue;
 
     // Skip files permanently dismissed by /clear (never re-adopted)

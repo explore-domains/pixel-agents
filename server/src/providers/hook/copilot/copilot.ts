@@ -1,4 +1,37 @@
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+
 import type { AgentEvent, HookProvider } from '../../../../../core/src/provider.js';
+
+function getSessionDirs(workspacePath: string): string[] {
+  const sessionRootDir = path.join(os.homedir(), '.copilot', 'session-state');
+  if (!fs.existsSync(sessionRootDir)) return [];
+
+  const dirs = fs.readdirSync(sessionRootDir);
+  const matchingDirs: string[] = [];
+
+  // Remove trailing slash for comparison
+  const targetCwd = workspacePath.replace(/[\\/]$/, '');
+
+  for (const d of dirs) {
+    const sessionDir = path.join(sessionRootDir, d);
+    const workspaceYaml = path.join(sessionDir, 'workspace.yaml');
+
+    if (fs.existsSync(workspaceYaml)) {
+      try {
+        const content = fs.readFileSync(workspaceYaml, 'utf-8');
+        // Check for exact cwd match in the YAML
+        if (content.includes(`cwd: ${targetCwd}\n`) || content.includes(`cwd: ${targetCwd}\r\n`)) {
+          matchingDirs.push(sessionDir);
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }
+  return matchingDirs;
+}
 
 export function normalizeHookEvent(
   raw: Record<string, unknown>,
@@ -63,6 +96,7 @@ export const copilotProvider: HookProvider = {
   displayName: 'GitHub Copilot CLI',
   protocolVersion: 1,
   normalizeHookEvent,
+  getSessionDirs,
   installHooks: async () => {},
   uninstallHooks: async () => {},
   areHooksInstalled: async () => true,
